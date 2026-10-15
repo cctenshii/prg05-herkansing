@@ -1,7 +1,8 @@
 <nav class="my-6 pl-4 pr-4 flex gap-4 items-center justify-between">
     <div class="flex gap-4">
         <x-nav-link href="{{ route('about') }}" :active="Route::is('about')">About</x-nav-link>
-        {{--        <x-nav-link href="{{ route('cdramas.index') }}" :active="Route::is('cdramas.index')">Cdramas</x-nav-link>--}}
+        <x-nav-link href="{{ route('blindboxes.index') }}" :active="Route::is('blindboxes.index')">Blindboxes
+        </x-nav-link>
         {{--        <x-nav-link href="{{ route('contact') }}" :active="Route::is('contact')">Contact</x-nav-link>--}}
     </div>
 
