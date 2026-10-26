@@ -8,14 +8,18 @@ class Blindbox extends Model
 {
     protected $fillable = [
         'name',
-        'series_id',
+        'serie_id',
         'summary',
         'image',
-        'public', // allow mass assignment if needed
+        'public',
         'created_by',
     ];
 
-    public function series(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    protected $casts = [
+        'public' => 'boolean',
+    ];
+
+    public function serie(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Serie::class);
     }
@@ -25,6 +29,9 @@ class Blindbox extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-
+    public function favoritedBy(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'blindbox_user')->withTimestamps();
+    }
 }
 

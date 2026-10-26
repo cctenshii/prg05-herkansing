@@ -2,20 +2,11 @@
     <div class="pl-4 pr-4 flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Pop Mart blindboxes list</h1>
         @auth
-            {{-- Show "Add" only for logged in users (Admin or User) --}}
-            @if(Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'User')
-                @if(Auth::user()->login_count >= 3)
-                    <a href="{{ route('blindboxes.create') }}"
-                       class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-400">
-                        Add Blindbox
-                    </a>
-                @else
-                    <button disabled
-                            class="bg-gray-300 text-gray-600 px-4 py-2 rounded cursor-not-allowed"
-                            title="You need to log in at least 3 times to add a Blindbox">
-                        Add Blindbox
-                    </button>
-                @endif
+            @if(optional(Auth::user()->role)->name === 'Admin' || optional(Auth::user()->role)->name === 'User')
+                <a href="{{ route('blindboxes.create') }}"
+                   class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-400">
+                    Add Blindbox
+                </a>
             @endif
         @endauth
 
@@ -30,11 +21,11 @@
                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 flex-1">
 
             {{-- Series Filter --}}
-            <select name="series_id"
+            <select name="serie_id"
                     class="border border-gray-300 rounded pr-10 pl-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <option value="">All Series</option>
                 @foreach($series as $serie)
-                    <option value="{{ $serie->id }}" {{ request('series_id') == $serie->id ? 'selected' : '' }}>
+                    <option value="{{ $serie->id }}" {{ request('serie_id') == $serie->id ? 'selected' : '' }}>
                         {{ $serie->name }}
                     </option>
                 @endforeach
@@ -81,7 +72,7 @@
                 <div class="flex-1 md:pl-6 flex flex-col justify-between h-full">
                     <div>
                         <h2 class="text-xl font-semibold mb-2">{{ $blindbox->name }}</h2>
-                        <p class="text-gray-600 mb-2">Series: {{ $blindbox->series->name ?? 'Unknown' }}</p>
+                        <p class="text-gray-600 mb-2">Series: {{ $blindbox->serie->name ?? 'Unknown' }}</p>
 
                         @if($blindbox->creator)
                             <p class="text-gray-500 text-sm">Added by: {{ $blindbox->creator->name }}</p>
@@ -89,12 +80,21 @@
 
                     </div>
 
-                    <div class="flex space-x-2 mt-4">
-                        {{-- View button: visible to everyone --}}
+                    <div class="flex flex-wrap gap-2 mt-4">
                         <a href="{{ route('blindboxes.show', $blindbox) }}"
                            class="bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-300">
                             View
                         </a>
+
+                        @auth
+                            <form method="POST" action="{{ route('blindboxes.favorite', $blindbox) }}">
+                                @csrf
+                                <button type="submit"
+                                        class="{{ auth()->user()->favoriteBlindboxes()->whereKey($blindbox->id)->exists() ? 'bg-yellow-500 hover:bg-yellow-400' : 'bg-gray-500 hover:bg-gray-400' }} text-white px-3 py-1 rounded">
+                                    {{ auth()->user()->favoriteBlindboxes()->whereKey($blindbox->id)->exists() ? '★ Favorited' : '☆ Favorite' }}
+                                </button>
+                            </form>
+                        @endauth
                     </div>
 
                 </div>

@@ -31,14 +31,24 @@
                     <p class="text-lg"><span
                             class="font-semibold">Serie:</span> {{ $blindbox->serie->name ?? 'Unknown' }}</p>
 
-                    @if($blindbox->created_by)
+                    @if($blindbox->creator)
                         <p class="text-lg text-gray-600"><span
-                                class="font-semibold">Added by:</span> {{ $blindbox->created_by->name }}</p>
+                                class="font-semibold">Added by:</span> {{ $blindbox->creator->name }}</p>
                     @endif
                 </div>
 
 
                 <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ $blindbox->summary }}</p>
+
+                @auth
+                    <form method="POST" action="{{ route('blindboxes.favorite', $blindbox) }}" class="mt-6">
+                        @csrf
+                        <button type="submit"
+                                class="{{ auth()->user()->favoriteBlindboxes()->whereKey($blindbox->id)->exists() ? 'bg-yellow-500 hover:bg-yellow-400' : 'bg-gray-500 hover:bg-gray-400' }} text-white px-4 py-2 rounded">
+                            {{ auth()->user()->favoriteBlindboxes()->whereKey($blindbox->id)->exists() ? '★ Favorited' : '☆ Favorite' }}
+                        </button>
+                    </form>
+                @endauth
             </div>
 
         </div>

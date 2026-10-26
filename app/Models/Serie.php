@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Serie extends Model
 {
-    public function blindbox()
+    protected $fillable = [
+        'name',
+    ];
+
+    public function blindboxes()
     {
         return $this->hasMany(Blindbox::class);
     }

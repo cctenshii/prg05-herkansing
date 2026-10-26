@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Blindbox;
 use App\Models\Serie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BlindboxController extends Controller
 {
@@ -13,19 +14,26 @@ class BlindboxController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Blindbox::query();
+        $query = Blindbox::with(['serie', 'creator']);
 
-        // Only show public blindboxes to non-admins
-        if (!auth()->check() || auth()->user()->role->name !== 'Admin') {
+        // Only show public blindboxes to guests and non-admins
+        if (
+            !auth()->check() ||
+            optional(auth()->user()->role)->name !== 'Admin'
+        ) {
             $query->where('public', true);
         }
 
-        // Search by name
+        // Search by blindbox name
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->search . '%'
+            );
         }
 
-        // Filter by genre
+        // Filter by series
         if ($request->filled('serie_id')) {
             $query->where('serie_id', $request->serie_id);
         }
@@ -33,7 +41,10 @@ class BlindboxController extends Controller
         $blindboxes = $query->get();
         $series = Serie::all();
 
-        return view('blindboxes.index', compact('blindboxes', 'series'));
+        return view(
+            'blindboxes.index',
+            compact('blindboxes', 'series')
+        );
     }
 
 
@@ -42,13 +53,8 @@ class BlindboxController extends Controller
      */
     public function create()
     {
-        $user = auth()->user();
-
-        // Require at least 3 logins before allowing "create"
-        if ($user->login_count < 3) {
-            return redirect()
-                ->route('blindboxes.index')
-                ->with('status', '⚠️ You must log in at least 3 times before adding a new Blindbox.');
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
         $series = \App\Models\Serie::all();
@@ -69,6 +75,7 @@ class BlindboxController extends Controller
 
         $blindbox = new Blindbox($validatedData);
         $blindbox->created_by = auth()->id();
+        $blindbox->public = true;
 
         if ($request->hasFile('image')) {
             $blindbox->image = $request->file('image')->store('blindboxes', 'public');
@@ -85,7 +92,27 @@ class BlindboxController extends Controller
      */
     public function show(Blindbox $blindbox)
     {
+        $blindbox->load(['serie', 'creator', 'favoritedBy']);
         return view('blindboxes.show', compact('blindbox'));
+    }
+
+    public function toggleFavorite(Blindbox $blindbox)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+
+        if ($user->favoriteBlindboxes()->whereKey($blindbox->id)->exists()) {
+            $user->favoriteBlindboxes()->detach($blindbox);
+            $message = 'Blindbox removed from favorites.';
+        } else {
+            $user->favoriteBlindboxes()->attach($blindbox);
+            $message = 'Blindbox added to favorites.';
+        }
+
+        return back()->with('status', $message);
     }
 
     /**

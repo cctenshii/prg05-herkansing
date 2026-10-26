@@ -19,8 +19,8 @@
             <x-nav-link href="{{ route('profile.edit') }}" :active="Route::is('profile.edit')">Profile</x-nav-link>
 
             {{-- Admin button --}}
-            @if(Auth::user()->role->name === 'Admin')
-                <x-nav-link href="{{ route('admin.cdramas.index') }}" :active="Route::is('admin.cdramas.index')">
+            @if(optional(Auth::user()->role)->name === 'Admin')
+                <x-nav-link href="{{ route('admin.blindboxes.index') }}" :active="Route::is('admin.blindboxes.index')">
                     Admin Overview
                 </x-nav-link>
             @endif
