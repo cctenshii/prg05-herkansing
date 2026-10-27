@@ -55,9 +55,9 @@
 
                 {{-- Image on the left --}}
                 <div class="w-full md:w-1/3 flex-shrink-0 mb-4 md:mb-0">
-                    @if ($blindbox->image)
+                    @if ($blindbox->image_url)
                         <img
-                            src="{{ asset('storage/' . $blindbox->image) }}"
+                            src="{{ $blindbox->image_url }}"
                             alt="{{ $blindbox->name }}"
                             class="w-full aspect-[1.41] object-cover rounded"
                         >

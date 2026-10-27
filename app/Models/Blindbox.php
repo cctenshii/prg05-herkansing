@@ -33,5 +33,24 @@ class Blindbox extends Model
     {
         return $this->belongsToMany(User::class, 'blindbox_user')->withTimestamps();
     }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!empty($this->image)) {
+            return asset('storage/' . $this->image);
+        }
+
+        $extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif'];
+
+        foreach ($extensions as $extension) {
+            $path = public_path("images/{$this->id}.{$extension}");
+
+            if (file_exists($path)) {
+                return asset("images/{$this->id}.{$extension}");
+            }
+        }
+
+        return null;
+    }
 }
 

@@ -12,14 +12,14 @@
 
             {{-- Image --}}
             <div class="flex-shrink-0">
-                @if ($blindbox->image && file_exists(public_path('storage/' . $blindbox->image)))
-                    <img src="{{ asset('storage/' . $blindbox->image) }}"
+                @if ($blindbox->image_url)
+                    <img src="{{ $blindbox->image_url }}"
                          alt="{{ $blindbox->name }}"
                          class="w-64 h-auto md:h-96 object-cover rounded shadow">
                 @else
-                    <img src="{{ asset('images/placeholder.jpg') }}"
-                         alt="No image available"
-                         class="w-64 h-auto md:h-96 object-cover rounded opacity-70 shadow">
+                    <div class="w-64 h-96 bg-gray-200 flex items-center justify-center rounded shadow text-gray-500">
+                        No image
+                    </div>
                 @endif
             </div>
 
