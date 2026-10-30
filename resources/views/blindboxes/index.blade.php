@@ -9,8 +9,15 @@
                 </a>
             @endif
         @endauth
-
     </div>
+
+    @if(session('status'))
+        <div class="mb-4 mx-4 p-2 bg-green-200 rounded">{{ session('status') }}</div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-4 mx-4 p-2 bg-red-200 rounded text-red-800">{{ session('error') }}</div>
+    @endif
 
     <div class="mb-6 flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
         <form method="GET" action="{{ route('blindboxes.index') }}"

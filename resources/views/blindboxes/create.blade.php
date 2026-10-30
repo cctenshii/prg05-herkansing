@@ -6,6 +6,12 @@
             &larr; Go Back
         </a>
 
+        @if ($errors->has('general'))
+            <div class="mb-4 p-3 rounded bg-red-100 text-red-700">
+                {{ $errors->first('general') }}
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('blindboxes.store') }}" enctype="multipart/form-data"
               class="bg-white shadow-md rounded-lg p-6 space-y-4">
 
