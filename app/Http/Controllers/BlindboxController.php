@@ -11,16 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class BlindboxController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(Request $request)
     {
         $query = Blindbox::with(['serie', 'creator']);
 
         // Only show public blindboxes to guests and non-admins
         if (
-            ! auth()->check() ||
+            !auth()->check() ||
             optional(auth()->user()->role)->name !== 'Admin'
         ) {
             $query->where('public', true);
@@ -31,7 +29,7 @@ class BlindboxController extends Controller
             $query->where(
                 'name',
                 'like',
-                '%'.$request->search.'%'
+                '%' . $request->search . '%'
             );
         }
 
@@ -49,16 +47,13 @@ class BlindboxController extends Controller
         );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-        if (! $this->canCreateBlindbox()) {
+        if (!$this->canCreateBlindbox()) {
             return redirect()->route('blindboxes.index')->with(
                 'error',
                 'You must favorite at least 5 blindboxes before creating a new blindbox.'
@@ -70,16 +65,13 @@ class BlindboxController extends Controller
         return view('blindboxes.create', compact('series'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-        if (! $this->canCreateBlindbox()) {
+        if (!$this->canCreateBlindbox()) {
             throw ValidationException::withMessages([
                 'general' => ['You must favorite at least 5 blindboxes before creating a new blindbox.'],
             ]);
@@ -105,9 +97,6 @@ class BlindboxController extends Controller
         return redirect()->route('blindboxes.index')->with('success', 'Blindbox created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Blindbox $blindbox)
     {
         $blindbox->load(['serie', 'creator', 'favoritedBy']);
@@ -115,9 +104,34 @@ class BlindboxController extends Controller
         return view('blindboxes.show', compact('blindbox'));
     }
 
+    public function favorites(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $query = auth()->user()->favoriteBlindboxes()->with(['serie', 'creator']);
+
+        if ($request->filled('search')) {
+            $query->where(function ($queryBuilder) use ($request) {
+                $queryBuilder->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('summary', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('serie_id')) {
+            $query->where('serie_id', $request->serie_id);
+        }
+
+        $blindboxes = $query->get();
+        $series = Serie::all();
+
+        return view('blindboxes.favorites', compact('blindboxes', 'series'));
+    }
+
     public function toggleFavorite(Blindbox $blindbox)
     {
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()->route('login');
         }
 
@@ -134,9 +148,6 @@ class BlindboxController extends Controller
         return back()->with('status', $message);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Blindbox $blindbox)
     {
         $this->ensureUserCanManageBlindbox($blindbox);
@@ -147,9 +158,6 @@ class BlindboxController extends Controller
         return view('blindboxes.edit', compact('blindbox', 'series', 'users'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Blindbox $blindbox)
     {
         $this->ensureUserCanManageBlindbox($blindbox);
@@ -176,9 +184,6 @@ class BlindboxController extends Controller
         return redirect()->route('blindboxes.index')->with('success', 'Blindbox updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Blindbox $blindbox)
     {
         $this->ensureUserCanManageBlindbox($blindbox);
@@ -194,7 +199,7 @@ class BlindboxController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
@@ -209,7 +214,7 @@ class BlindboxController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user) {
+        if (!$user) {
             abort(403, 'You must be logged in to manage blindboxes.');
         }
 
@@ -217,7 +222,7 @@ class BlindboxController extends Controller
             return;
         }
 
-        if ((int) $blindbox->created_by !== (int) $user->id) {
+        if ((int)$blindbox->created_by !== (int)$user->id) {
             abort(403, 'You can only manage blindboxes you created.');
         }
     }

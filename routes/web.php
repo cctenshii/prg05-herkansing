@@ -1,18 +1,22 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminBlindboxController;
 use App\Http\Controllers\BlindboxController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SerieController;
 use Illuminate\Support\Facades\Route;
 
-//Route::get('/', function () {
+// Route::get('/', function () {
 //    return view('welcome');
-//});
+// });
 
 Route::get('/', function () {
     return view('about');
 })->name('about');
 
+Route::get('blindboxes/favorites', [BlindboxController::class, 'favorites'])
+    ->middleware('auth')
+    ->name('blindboxes.favorites');
 Route::resource('blindboxes', BlindboxController::class);
 Route::post('blindboxes/{blindbox}/favorite', [BlindboxController::class, 'toggleFavorite'])
     ->name('blindboxes.favorite');
@@ -30,11 +34,11 @@ Route::middleware('auth')->group(function () {
 
 // Admin routes
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/blindboxes', [App\Http\Controllers\AdminBlindboxController::class, 'index'])
+    Route::get('/admin/blindboxes', [AdminBlindboxController::class, 'index'])
         ->name('admin.blindboxes.index');
 
-    Route::post('/admin/blindboxes/{blindbox}/toggle', [App\Http\Controllers\AdminBlindboxController::class, 'togglePublic'])
+    Route::post('/admin/blindboxes/{blindbox}/toggle', [AdminBlindboxController::class, 'togglePublic'])
         ->name('admin.blindboxes.toggle');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

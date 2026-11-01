@@ -3,6 +3,9 @@
         <x-nav-link href="{{ route('about') }}" :active="Route::is('about')">About</x-nav-link>
         <x-nav-link href="{{ route('blindboxes.index') }}" :active="Route::is('blindboxes.index')">Blindboxes
         </x-nav-link>
+        @auth
+            <x-nav-link href="{{ route('blindboxes.favorites') }}" :active="Route::is('blindboxes.favorites')">Favorites</x-nav-link>
+        @endauth
         {{--        <x-nav-link href="{{ route('contact') }}" :active="Route::is('contact')">Contact</x-nav-link>--}}
     </div>
 
